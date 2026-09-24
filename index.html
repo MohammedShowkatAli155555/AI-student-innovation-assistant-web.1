@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Student Innovation Assistant</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, #243b80, transparent 35%),
+                radial-gradient(circle at bottom right, #5b267a, transparent 35%),
+                #090d1a;
+            color: #ffffff;
+        }
+
+        .container {
+            width: min(1150px, 94%);
+            margin: auto;
+            padding: 30px 0 50px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 10px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #6c63ff, #b54cff);
+            font-size: 32px;
+            margin-bottom: 18px;
+            box-shadow: 0 15px 40px rgba(105, 80, 255, 0.3);
+        }
+
+        h1 {
+            font-size: clamp(30px, 5vw, 52px);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: #bfc7e5;
+            font-size: 17px;
+            max-width: 750px;
+            margin: auto;
+            line-height: 1.6;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 25px;
+            padding: 28px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #dbe0f4;
+            margin-bottom: 9px;
+            font-weight: bold;
+        }
+
+        textarea,
+        select {
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            padding: 15px;
+            background: rgba(0,0,0,0.25);
+            color: white;
+            outline: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        textarea {
+            min-height: 125px;
+            resize: vertical;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #11162a;
+            color: white;
+        }
+
+        textarea:focus,
+        select:focus {
+            border-color: #887cff;
+            box-shadow: 0 0 0 3px rgba(136, 124, 255, 0.12);
+        }
+
+        .generate-btn {
+            width: 100%;
+            border: none;
+            padding: 17px;
+            border-radius: 14px;
+            margin-top: 5px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #6c63ff, #b54cff);
+            transition: 0.2s;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(117, 85, 255, 0.3);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .voice-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .small-btn {
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.08);
+            color: white;
+            padding: 9px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .small-btn:hover {
+            background: rgba(255,255,255,0.14);
+        }
+
+        .result-section {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .result-card {
+            background: rgba(0,0,0,0.24);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-header h2 {
+            font-size: 22px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .answer {
+            color: #e8ebf7;
+            line-height: 1.75;
+            font-size: 15px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 35px;
+            color: #c9cef0;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: #a493ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            background: rgba(255, 70, 70, 0.1);
+            border: 1px solid rgba(255, 100, 100, 0.25);
+            color: #ffb5b5;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+        }
+
+        .feature-icon {
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .feature p {
+            color: #aeb6d4;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #8992b5;
+            font-size: 13px;
+        }
+
+        @media (max-width: 750px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .main-card {
+                padding: 18px;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <div class="logo">🤖</div>
+
+        <h1>AI Student Innovation Assistant</h1>
+
+        <p class="subtitle">
+            Turn your project idea into a complete college project plan
+            with AI-generated ideas, objectives, technology suggestions,
+            PPT content and viva questions.
+        </p>
+    </header>
+
+    <main class="main-card">
+
+        <div class="form-grid">
+
+            <div class="full">
+
+                <label for="topic">
+                    💡 Enter Your Project Topic
+                </label>
+
+                <textarea
+                    id="topic"
+                    placeholder="Example: Smart Health Monitoring System using AI"
+                ></textarea>
+
+                <div class="voice-row">
+                    <button class="small-btn" id="voiceBtn">
+                        🎙️ Voice Input
+                    </button>
+
+                    <button class="small-btn" id="clearBtn">
+                        🗑️ Clear
+                    </button>
+                </div>
+
+            </div>
+
+            <div>
+
+                <label for="type">
+                    📚 What do you need?
+                </label>
+
+                <select id="type">
+
+                    <option value="Project Ideas">
+                        💡 Project Ideas
+                    </option>
+
+                    <option value="Problem Statement">
+                        📝 Problem Statement
+                    </option>
+
+                    <option value="Objectives">
+                        🎯 Objectives
+                    </option>
+
+                    <option value="Technology Stack">
+                        🛠️ Technology Stack
+                    </option>
+
+                    <option value="PPT Points">
+                        📊 PPT Points
+                    </option>
+
+                    <option value="Viva Questions">
+                        🎤 Viva Questions
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label for="language">
+                    🌐 Response Language
+                </label>
+
+                <select id="language">
+
+                    <option value="English">
+                        English
+                    </option>
+
+                    <option value="Telugu">
+                        Telugu
+                    </option>
+
+                    <option value="Hindi">
+                        Hindi
+                    </option>
+
+                    <option value="Urdu">
+                        Urdu
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="full">
+
+                <button
+                    class="generate-btn"
+                    id="generateBtn"
+                >
+                    ✨ Generate with AI
+                </button>
+
+            </div>
+
+        </div>
+
+        <section
+            class="result-section"
+            id="resultSection"
+        >
+
+            <div class="result-card">
+
+                <div class="result-header">
+
+                    <h2 id="resultTitle">
+                        AI Result
+                    </h2>
+
+                    <div class="result-actions">
+
+                        <button
+                            class="small-btn"
+                            id="copyBtn"
+                        >
+                            📋 Copy
+                        </button>
+
+                        <button
+                            class="small-btn"
+                            id="speakBtn"
+                        >
+                            🔊 Speak
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="answer"
+                    id="answer"
+                ></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <div class="features">
+
+        <div class="feature">
+
+            <div class="feature-icon">💡</div>
+
+            <h3>Project Ideas</h3>
+
+            <p>
+                Generate practical and innovative project concepts
+                for college students.
+            </p>
+
+        </div>
+
+        <div class="feature">
+
+            <div class="feature-icon">🛠️</div>
+
+            <h3>Technology Guidance</h3>
+
+            <p>
+                Get frontend, backend, database and AI technology
+                recommendations.
+            </p>
+
+        </div>
+
+        <div class="feature">
+
+            <div class="feature-icon">🎤</div>
+
+            <h3>Viva Preparation</h3>
+
+            <p>
+                Practice common project viva questions and
+                easy-to-understand answers.
+            </p>
+
+        </div>
+
+    </div>
+
+    <footer>
+        AI Student Innovation Assistant • Built with HTML, CSS,
+        JavaScript and Node.js
+    </footer>
+
+</div>
+
+
+<script>
+
+    const topicInput = document.getElementById("topic");
+    const typeInput = document.getElementById("type");
+    const languageInput = document.getElementById("language");
+
+    const generateBtn = document.getElementById("generateBtn");
+
+    const resultSection = document.getElementById("resultSection");
+    const resultTitle = document.getElementById("resultTitle");
+    const answerBox = document.getElementById("answer");
+
+    const copyBtn = document.getElementById("copyBtn");
+    const speakBtn = document.getElementById("speakBtn");
+
+    const voiceBtn = document.getElementById("voiceBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+
+    // Generate AI response
+    generateBtn.addEventListener("click", async () => {
+
+        const topic = topicInput.value.trim();
+
+        if (!topic) {
+            alert("Please enter a project topic.");
+            topicInput.focus();
+            return;
+        }
+
+        const type = typeInput.value;
+        const language = languageInput.value;
+
+        generateBtn.disabled = true;
+        generateBtn.textContent = "⏳ Generating...";
+
+        resultSection.style.display = "block";
+
+        resultTitle.textContent = "Generating AI Response...";
+
+        answerBox.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>AI is working on your request...</p>
+            </div>
+        `;
+
+        try {
+
+            const response = await fetch("/api/generate", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    topic: topic,
+                    type: type,
+                    language: language
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error || "Something went wrong."
+                );
+            }
+
+            resultTitle.textContent = type;
+
+            answerBox.textContent = data.answer;
+
+        } catch (error) {
+
+            console.error(error);
+
+            resultTitle.textContent = "Error";
+
+            answerBox.innerHTML = `
+                <div class="error">
+                    ❌ ${escapeHtml(error.message)}
+                </div>
+            `;
+
+        } finally {
+
+            generateBtn.disabled = false;
+
+            generateBtn.textContent = "✨ Generate with AI";
+        }
+
+    });
+
+
+    // Copy answer
+    copyBtn.addEventListener("click", async () => {
+
+        const text = answerBox.innerText;
+
+        if (!text || text.includes("AI is working")) {
+            return;
+        }
+
+        try {
+
+            await navigator.clipboard.writeText(text);
+
+            copyBtn.textContent = "✅ Copied!";
+
+            setTimeout(() => {
+                copyBtn.textContent = "📋 Copy";
+            }, 1500);
+
+        } catch (error) {
+
+            alert("Unable to copy the text.");
+
+        }
+
+    });
+
+
+    // Text to speech
+    speakBtn.addEventListener("click", () => {
+
+        const text = answerBox.innerText;
+
+        if (!text) {
+            return;
+        }
+
+        if (!("speechSynthesis" in window)) {
+            alert("Text-to-speech is not supported in this browser.");
+            return;
+        }
+
+        speechSynthesis.cancel();
+
+        const speech = new SpeechSynthesisUtterance(text);
+
+        const language = languageInput.value;
+
+        if (language === "Telugu") {
+            speech.lang = "te-IN";
+        } else if (language === "Hindi") {
+            speech.lang = "hi-IN";
+        } else if (language === "Urdu") {
+            speech.lang = "ur-IN";
+        } else {
+            speech.lang = "en-IN";
+        }
+
+        speech.rate = 0.9;
+
+        speechSynthesis.speak(speech);
+
+    });
+
+
+    // Clear
+    clearBtn.addEventListener("click", () => {
+
+        topicInput.value = "";
+
+        resultSection.style.display = "none";
+
+        answerBox.textContent = "";
+
+        topicInput.focus();
+
+    });
+
+
+    // Voice input
+    let recognition;
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+
+        recognition = new SpeechRecognition();
+
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        voiceBtn.addEventListener("click", () => {
+
+            recognition.lang = getSpeechLanguage();
+
+            recognition.start();
+
+            voiceBtn.textContent = "🎙️ Listening...";
+
+        });
+
+        recognition.onresult = (event) => {
+
+            const transcript =
+                event.results[0][0].transcript;
+
+            topicInput.value = transcript;
+
+        };
+
+        recognition.onend = () => {
+
+            voiceBtn.textContent = "🎙️ Voice Input";
+
+        };
+
+        recognition.onerror = () => {
+
+            voiceBtn.textContent = "🎙️ Voice Input";
+
+            alert(
+                "Voice input could not be started. Please check microphone permission."
+            );
+
+        };
+
+    } else {
+
+        voiceBtn.addEventListener("click", () => {
+
+            alert(
+                "Voice input is not supported in this browser. Try Google Chrome."
+            );
+
+        });
+
+    }
+
+
+    function getSpeechLanguage() {
+
+        const language = languageInput.value;
+
+        if (language === "Telugu") {
+            return "te-IN";
+        }
+
+        if (language === "Hindi") {
+            return "hi-IN";
+        }
+
+        if (language === "Urdu") {
+            return "ur-IN";
+        }
+
+        return "en-IN";
+
+    }
+
+
+    function escapeHtml(text) {
+
+        const div = document.createElement("div");
+
+        div.textContent = text;
+
+        return div.innerHTML;
+
+    }
+
+</script>
+
+</body>
+</html>
