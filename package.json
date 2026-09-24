@@ -1,0 +1,25 @@
+{
+  "name": "ai-student-innovation-assistant",
+  "version": "1.0.0",
+  "description": "AI Student Innovation Assistant using HTML, CSS, JavaScript and Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ai",
+    "student",
+    "innovation",
+    "education",
+    "nodejs"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
